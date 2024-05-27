@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+
+    <title>Text dispose</title>
+
+    
+    </style>
+  </head>
+
+  <body>
+    <button>
+      按这里
+    </button>
+    <div id = "greeting"></div>
+    <script>
+      const button = document.querySelector("button");
+
+      function greet() {
+        const name = prompt("你叫什么名字");
+        const greeting = document.querySelector("#greeting");
+        greeting.textContent = `你好呀，${name}!很高兴见到你！`;
+      }
+
+      button.addEventListener("click", greet);
+    </script>
+  </body>
