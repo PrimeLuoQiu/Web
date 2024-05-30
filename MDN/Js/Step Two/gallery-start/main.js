@@ -5,37 +5,38 @@ const btn = document.querySelector('button');
 const overlay = document.querySelector('.overlay');
 
 /* Declaring the array of image filenames */
+Photos = ['pic1.jpg', 'pic2.jpg', 'pic3.jpg', 'pic4.jpg', 'pic5.jpg'];
 
+alts = {
+  'pic1.jpg' : 'Closeup of a human eyes',
+  'pic2.jpg' : 'Rock',
+  'pic3.jpg' : 'Purple and white pansies',
+  'pic4.jpg' : 'Section of wall from a',
+  'pic5.jpg' : 'Large moth on a leaf'
+}
 /* Declaring the alternative text for each image file */
 
 /* Looping through images */
-
-const Photo = ['pic1.jpg', 'pic2.jpg', 'pic3.jpg', 'pic4.jpg', 'pic5.jpg'];
-
-for(var i = 0; i < Photo.length; i ++) {
-const newImage = document.createElement('img');
-newImage.setAttribute('src', image/Photo[i].jpg);
-newImage.setAttribute('alt', image/Photo[i].jpg);
-thumbBar.appendChild(newImage);
-
-newImage.addEventListener("click", () => {
-    style = Photo[i].style;
-    displayedImage = style;
-}) 
-
-}
-
-btn.addEventListener('click', () => {
-    const btnClass = btn.getAttribute('class');
-    if (btnClass === 'dark') {
-      btn.setAttribute('class','light');
-      btn.textContent = 'Lighten';
-      overlay.style.backgroundColor = 'rgba(0,0,0,0.5)';
-    } else {
-      btn.setAttribute('class','dark');
-      btn.textContent = 'Darken';
-      overlay.style.backgroundColor = 'rgba(0,0,0,0)';
-    }
+for(const Photo of Photos) {
+  const newImage = document.createElement('img');
+  newImage.setAttribute('src', `images/${Photo}`);
+  newImage.setAttribute('alt', alts[Photo]);
+  thumbBar.appendChild(newImage);
+  newImage.addEventListener('click', e => {
+    displayedImage.src = e.target.src;
+    displayedImage.alt = e.target.alt;
   });
-
+}
 /* Wiring up the Darken/Lighten button */
+btn.addEventListener('click', () => {
+  const btnClass = btn.getAttribute('class');
+  if(btnClass === 'dark') {
+    btn.setAttribute('class', 'light');
+    btn.textContent = 'Lighten';
+    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+  } else {
+    btn.setAttribute('class', 'dark');
+    btn.textContent = 'Darken';
+    overlay.style.backgroundColor = 'rgba(0,0,0,0)';
+  }
+})
