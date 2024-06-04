@@ -43,7 +43,7 @@ function doOperation() {
 doOperation();
 ~~~
 ## 使用Promise
-一个由异步函数返回的对象，指示操作当前所处的状态。
+**一个由异步函数返回的对象，指示操作当前所处的状态。**
 
 ### 使用fetch()API
 我们这次选择使用一个更加现代的基于Promise的替代XML的办法
@@ -198,7 +198,127 @@ fetchProducts();
 try 和 catch也是可以处理错误的，但只在异步函数中有用。
 只能在async函数中使用await，除非是js模块，意味着不能再普通脚本中这样：
 ~~~ js
+try {
+  // 只有在模块中才能在异步函数之外使用 await
+  const response = await fetch(
+    "https://mdn.github.io/learning-area/javascript/apis/fetching-data/can-store/products.json",
+  );
+  if (!response.ok) {
+    throw new Error(`HTTP 请求错误：${response.status}`);
+  }
+  const data = await response.json();
+  console.log(data[0].name);
+} catch (error) {
+  console.error(`无法获取产品列表：${error}`);
+}
 
 ~~~
 
 await强制异步操作以串联的方式完成。如果下一个操作的结果取决于上一个操作的结果，这是必要的，但如果不是，像promise.all()会有更好的性能。
+
+## 如何实现基于Promise的API
+虽然不太常见，但是值得了解
+
+### 实现Alarm() API
+将会实现一个基于Promise的 alarm API 它将以被唤醒人的名字和一个在被人唤醒前以毫秒为单位的延迟作为参数。在延迟之后，本函数将会发送一个包含需要被唤醒人名字的"Wake Up"消息
+用setTimeout来实现`alarm`函数，sTo以一个回调函数和一个毫秒为单位的延迟作为参数，当调用sTo时，启动一个设置为给定延时的计时器，当时间过期时，它就会调用给定的回调函数。
+#### Promise 构造器
+返回一个在定时器过期才会被对象的Promise，传递一个Wakeup到then中，也会在调用者提供一个负延迟值时拒绝这个Promise
+
+关键组件在于Promise()构造器，使用单个函数作为参数，这个函数叫做执行器，创建一个新的promise的时候需要实现这个执行器。
+执行器本身采用两个参数，这两个参数也是函数，通常被称为`resolve`和`reject`，在执行器实现里，调用原始的异步函数，如果异步函数成功了，就调用额`resolve`失败了就调用`reject`。如果失败了就调用`reject`如果执行器抛出了一个错误，`reject`就会自动调用，可以将任何类型的单个参数传递到`resolve`和`reject`中
+
+可以像这样实现`alarm()`
+~~~ js
+function alarm(person, delay) { //对于执行器中的promise
+  return new Promise((resolve, reject) => {
+    if (delay < 0) {
+      throw new Error("Alarm delay must not be negative");
+    }
+    window.setTimeout(() => {
+      resolve(`Wake up, ${person}!`);
+    }, delay);
+  });
+}
+~~~
+
+### 使用alarm() API
+调用`alarm()`，在返回的promise中调用`then()`和`catch()`来设置promise兑现和拒绝状态的处理器
+
+~~~ js
+const name = document.querySelector("#name");
+const delay = document.querySelector("#delay");
+
+function alarm(person, delay) {
+    return new Promise((resolve, reject) => {
+        if(delay < 0) {
+            throw new Error("Alarm delay must not be negative");
+        }
+        window.setTimeout(() => {
+            resolve(`Wake up, ${person}!`);
+        }, delay);
+    });
+}
+
+button.addEventListener("click", () => {
+    alarm(name.value, delay.value)
+    .then((message) => (output.textContent = message))
+    .catch((error) => output.textContent = `Couldn't set alarm: ${error}`);
+});
+~~~
+
+### 在alarm() API上使用async和await
+自从alarm()返回了一个Promise，我们可以对它做任何有关promise做的事情`promise.all()`和`async/await`
+
+~~~ js
+const name = document.querySelector("#name");
+const delay = document.querySelector("#delay");
+const button = document.querySelector("#set-alarm");
+const output = document.querySelector("#output");
+
+function alarm(person, delay) {
+  return new Promise((resolve, reject) => {
+    if (delay < 0) {
+      throw new Error("Alarm delay must not be negative");
+    }
+    window.setTimeout(() => {
+      resolve(`Wake up, ${person}!`);
+    }, delay);
+  });
+}
+
+button.addEventListener("click", async () => {
+  try {
+    const message = await alarm(name.value, delay.value);
+    output.textContent = message;
+  } catch (error) {
+    output.textContent = `Couldn't set alarm: ${error}`;
+  }
+});
+
+~~~
+
+## worker简介
+能够在单独执行的线程中运行一些任务。
+
+Woker给了在不同线程中运行某些任务的能力，可以启动任务，然后继续其他的处理(如用户操作)
+
+也就是多线程，会存在一些意外情况，例如两个线程都可以访问相同的变量。容易引发bug
+为了避免这些问题，主代码和worker的代码永远不能直接访问彼此的变量。它们运行在分离的环境中，只有通过互相发送消息交互。worker不能访问dom
+
+三种类型workers：
+- dedicated workers
+- shared workers
+- service workers
+### 使用web workers
+
+在曾经的质数的例子，我们来使用worker进行质数生成
+
+只要主脚本创建worker，在generate.js中的代码就会运行。
+
+worker要做的第一件事就是开始监听来自主脚本的消息，通过`addEventListener`来实现。在worker中是一个全局函数。在message事件处理器内部，事件的Data属性包含一个来自主脚本的参数的副本。如果主脚本传递generate命令，那么调用`generatePrimes()`传入来自消息事件的`quota`值
+worker内函数在完成后给主线程发一条消息，而不是返回一个值。
+
+### 其他类型的worker
+sharedWorker可以由运行在不同窗口中的多个不同脚本共享
+serviceworker的行为就像代理服务器，缓存资源以便web应用程序可以在用户离线时工作。是渐进式web应用的关键组件。
