@@ -21,3 +21,8 @@ document.querySelector("#reload").addEventListener("click", () => {
     document.querySelector("#user-input").value = 'Try typing in here immediately after pressing "Generate primes"';
     document.location.reload();    
 });
+
+// 使用Web Animation API对图像进行动画处理
+// alice1.animate(aliceTumbling, aliceTiming);
+//element.animate返回的是一个Animation对象，该对象有一个finished属性，这个属性才是Promise
+
