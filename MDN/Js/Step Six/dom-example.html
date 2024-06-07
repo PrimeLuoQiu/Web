@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .hightlight {
+            color: white;
+            background-color: black;
+            padding: 10px;
+            width: 250px;
+            text-align: center;
+        }
+    </style>
+    <title>Simple DOM example</title>
+</head>
+<body>
+<section>
+    <img src="dinosaur.png" alt="A red Tyrannosaurus Rex: A two legged dinosaur standing upright like a human, with small arms, and a large head with lots of sharp teeth.">
+    <p>Here we will add a link to the <a href="https://www.mozilla.org/">Mozilla homepage</a></p>
+</section>
+<script>
+    const link = document.querySelector("a");
+    link.textContent = "Mozilla Developer Network";
+    link.href = "https://developer.mozilla.org";
+
+    const sect = document.querySelector("section");
+    const para = document.createElement("p");
+    para.textContent = "We hope you enjoyed the ride.";
+    sect.appendChild(para);
+
+    const text = document.createTextNode(
+        "- the premier source for web development knowledge.",
+    );
+
+    const linkPara = document.querySelector("p");
+    linkPara.appendChild(text);
+
+    // move and delete element
+    sect.appendChild(linkPara); //具有内部链接的段落移到section的底部
+    //后面的linkPara是对该段唯一副本的引用。如果想要复制并添加的话，需要使用
+
+    // delete
+    sect.removeChild(linkPara); //至少拥有要删除的节点和其父节点的引用，
+    // 删除一个仅基于自身引用的节点稍有复杂
+    linkPara.remove();
+    //较久的浏览器中
+    linkPara.parentNode.removeChild(linkPara);
+
+    // Control Css
+    // Way1: 直接将内联样式添加到想要的元素上
+    para.style.color = "white";
+    para.style.backgroundColor = "black";
+    para.style.padding = "10px";
+    para.style.width = "250px";
+    para.style.textAlign = "center";
+    // Way 2:  先进入head中添加 然后再用 Element.setAttribute 两个参数分别是想在元素上设置的属性，以及要为他设置的值。
+    para.setAttribute("class", "highlight");
+</script>
+</body>
+</html>
